@@ -31,7 +31,7 @@ module.exports.deleteCard = (req, res) => {
     .then((card) => {
       if (!card) {
         res
-          .status(ErrorCodes.NOT_FOUND)
+          .status(ErrorCodes.INTERNAL_SERVER_ERROR)
           .send({ message: 'Карточка с указанным id не найдена' });
         return;
       }
