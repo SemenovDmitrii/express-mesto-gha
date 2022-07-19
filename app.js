@@ -7,8 +7,8 @@ const app = express();
 const ErrorCodes = require('./errors/errors');
 
 mongoose.connect('mongodb://localhost:27017/mestodb', {
+  useUnifiedTopology: true,
   useNewUrlParser: true,
-  // useUnifiedTopology: true,
 });
 
 app.use(express.json());
