@@ -38,8 +38,8 @@ module.exports.deleteCard = (req, res) => {
       res.send(card);
     })
     .catch((err) => {
-      if (err.name === 'OwnTextError') {
-        res.status(ErrorCodes.BAD_REQUEST).send({ message: 'Некорректный id' });
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Некорректный id' });
         return;
       }
       res
@@ -64,10 +64,8 @@ module.exports.likeCard = (req, res) => {
       res.send(card);
     })
     .catch((err) => {
-      if (err.name === 'OwnTextError') {
-        res.status(ErrorCodes.BAD_REQUEST).send({
-          message: 'Переданы некорректные данные для постановки лайка',
-        });
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Некорректный id' });
         return;
       }
       res
@@ -92,10 +90,8 @@ module.exports.dislikeCard = (req, res) => {
       res.send(card);
     })
     .catch((err) => {
-      if (err.name === 'OwnTextError') {
-        res
-          .status(ErrorCodes.BAD_REQUEST)
-          .send({ message: 'Переданы некорректные данные для снятии лайка' });
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Некорректный id' });
         return;
       }
       res

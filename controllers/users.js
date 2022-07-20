@@ -19,10 +19,8 @@ module.exports.getUserById = (req, res) => {
       res.send(user);
     })
     .catch((err) => {
-      if (err.name === 'OwnTextError') {
-        res
-          .status(ErrorCodes.BAD_REQUEST)
-          .send({ message: 'Переданы некорректные данные пользователя' });
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Некорректный id' });
         return;
       }
       res
@@ -67,10 +65,8 @@ module.exports.updateProfile = (req, res) => {
       res.send(user);
     })
     .catch((err) => {
-      if (err.name === 'OwnTextError' || err.name === 'ValidationError') {
-        res.status(ErrorCodes.BAD_REQUEST).send({
-          message: `Переданы некорректные данные при обновлении профиля ${err.message}`,
-        });
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
+        res.status(400).send({ message: 'Переданы некорректные данные' });
         return;
       }
       res
@@ -97,10 +93,8 @@ module.exports.updateAvatar = (req, res) => {
       res.send(user);
     })
     .catch((err) => {
-      if (err.name === 'OwnTextError' || err.name === 'ValidationError') {
-        res.status(ErrorCodes.BAD_REQUEST).send({
-          message: `Переданы некорректные данные при обновлении аватара ${err.message}`,
-        });
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
+        res.status(400).send({ message: 'Переданы некорректные данные' });
         return;
       }
       res
