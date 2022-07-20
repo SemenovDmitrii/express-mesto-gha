@@ -4,7 +4,7 @@ const ErrorCodes = require('../errors/errors');
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch(() => res.status(ErrorCodes.NOT_FOUND).send({ message: 'Пользователь не найден' }));
+    .catch(() => res.status(ErrorCodes.INTERNAL_SERVER_ERROR).send({ message: 'Внутренняя ошибка сервера' }));
 };
 
 module.exports.getUserById = (req, res) => {
