@@ -30,9 +30,7 @@ module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
       if (!card) {
-        res
-          .status(ErrorCodes.NOT_FOUND)
-          .send({ message: 'Карточка с указанным id не найдена' });
+        res.status(ErrorCodes.NOT_FOUND).send({ message: 'Карточка с указанным id не найдена' });
         return;
       }
       res.send(card);
@@ -42,9 +40,7 @@ module.exports.deleteCard = (req, res) => {
         res.status(ErrorCodes.BAD_REQUEST).send({ message: 'Некорректный id' });
         return;
       }
-      res
-        .status(ErrorCodes.INTERNAL_SERVER_ERROR)
-        .send({ message: 'Внутренняя ошибка сервера' });
+      res.status(ErrorCodes.INTERNAL_SERVER_ERROR).send({ message: 'Внутренняя ошибка сервера' });
     });
 };
 
@@ -56,9 +52,7 @@ module.exports.likeCard = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        res
-          .status(ErrorCodes.NOT_FOUND)
-          .send({ message: 'Передан несуществующий id карточки' });
+        res.status(ErrorCodes.NOT_FOUND).send({ message: 'Передан несуществующий id карточки' });
         return;
       }
       res.send(card);
@@ -84,9 +78,7 @@ module.exports.dislikeCard = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        res
-          .status(ErrorCodes.NOT_FOUND)
-          .send({ message: 'Передан несуществующий id карточки' });
+        res.status(ErrorCodes.NOT_FOUND).send({ message: 'Передан несуществующий id карточки' });
         return;
       }
       res.send(card);
@@ -94,8 +86,7 @@ module.exports.dislikeCard = (req, res) => {
     .catch((err) => {
       if (err.name === 'OwnTextError') {
         res
-          .status(ErrorCodes.BAD_REQUEST)
-          .send({ message: 'Переданы некорректные данные для снятии лайка' });
+          .status(ErrorCodes.BAD_REQUEST).send({ message: 'Переданы некорректные данные для снятии лайка' });
         return;
       }
       res
