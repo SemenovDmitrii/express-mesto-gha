@@ -1,54 +1,51 @@
+const NotFoundError = require('../errors/NotFoundError');
+const BadRequestError = require('../errors/BadRequestError');
+const ForbiddenError = require('../errors/ForbiddenError');
 const Card = require('../models/card');
-const ErrorCodes = require('../errors/errors');
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.send({ data: cards }))
-    .catch(() => res.status(ErrorCodes.INTERNAL_SERVER_ERROR).send({ message: 'Внутренняя ошибка сервера' }));
+    .catch(next);
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   const owner = req.user._id;
-
   Card.create({ name, link, owner })
-    .then((card) => res.status(ErrorCodes.CREATED).send(card))
+    .then((card) => res.status(201).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(ErrorCodes.BAD_REQUEST).send({
-          message: `Переданы некорректные данные при создании карточки ${err.message}`,
-        });
-        return;
+        next(new BadRequestError(`Переданы некорректные данные при создании карточки: ${err}`));
+      } else {
+        next(err);
       }
-      res
-        .status(ErrorCodes.INTERNAL_SERVER_ERROR)
-        .send({ message: 'Внутренняя ошибка сервера' });
     });
 };
 
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
       if (!card) {
-        res
-          .status(ErrorCodes.NOT_FOUND)
-          .send({ message: 'Карточка с указанным id не найдена' });
-        return;
+        throw new NotFoundError('Карточка с указанным id не найдена');
       }
-      res.send(card);
+      if (JSON.stringify(card.owner) !== JSON.stringify(req.user._id)) {
+        throw new ForbiddenError('Чужая карточка, удаление невозможно');
+      } else {
+        return Card.deleteOne(card)
+          .then(() => res.status(200).send({ message: 'Выполнено' }));
+      }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Некорректный id' });
-        return;
+        throw new BadRequestError('Некорректный id');
       }
-      res
-        .status(ErrorCodes.INTERNAL_SERVER_ERROR)
-        .send({ message: 'Внутренняя ошибка сервера' });
-    });
+      next(err);
+    })
+    .catch(next);
 };
 
-module.exports.likeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
@@ -56,25 +53,20 @@ module.exports.likeCard = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        res
-          .status(ErrorCodes.NOT_FOUND)
-          .send({ message: 'Передан несуществующий id карточки' });
-        return;
+        throw new NotFoundError('Передан несуществующий id карточки');
       }
       res.send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Некорректный id' });
-        return;
+        throw new BadRequestError('Некорректный id');
       }
-      res
-        .status(ErrorCodes.INTERNAL_SERVER_ERROR)
-        .send({ message: 'Внутренняя ошибка сервера' });
-    });
+      next(err);
+    })
+    .catch(next);
 };
 
-module.exports.dislikeCard = (req, res) => {
+module.exports.dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
@@ -82,20 +74,15 @@ module.exports.dislikeCard = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        res
-          .status(ErrorCodes.NOT_FOUND)
-          .send({ message: 'Передан несуществующий id карточки' });
-        return;
+        throw new NotFoundError('Передан несуществующий id карточки');
       }
       res.send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Некорректный id' });
-        return;
+        throw new BadRequestError('Некорректный id');
       }
-      res
-        .status(ErrorCodes.INTERNAL_SERVER_ERROR)
-        .send({ message: 'Внутренняя ошибка сервера' });
-    });
+      next(err);
+    })
+    .catch(next);
 };
