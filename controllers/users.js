@@ -139,13 +139,8 @@ module.exports.updateAvatar = (req, res, next) => {
       res.send(user);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new BadRequestError('Переданы некорректные данные'));
-        return;
-      }
-      if (err.name === 'CastError') {
-        next(new BadRequestError('Переданы некорректные данные'));
-        return;
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
+        throw new BadRequestError('Переданы некорректные данные');
       }
       next(err);
     });
