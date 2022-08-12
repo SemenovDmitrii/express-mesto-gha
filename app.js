@@ -5,7 +5,7 @@ const cookieParser = require('cookie-parser');
 const { errors } = require('celebrate');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
-const handleErrors = require('./errors/handleErrors');
+const InternalServerError = require('./errors/InternalServerError');
 const auth = require('./middlewares/auth');
 const { login, createUser } = require('./controllers/users');
 const { validateSignup, validateSignIn } = require('./middlewares/validators');
@@ -46,7 +46,7 @@ app.use('*', () => {
 });
 
 app.use(errors());
-app.use(handleErrors);
+app.use(InternalServerError);
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
