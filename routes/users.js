@@ -1,44 +1,78 @@
-const router = require('express').Router();
+const routerUsers = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
 
 const {
+  login,
   getUser,
   getUsers,
+  createUser,
   getCurrentUser,
   updateUser,
   updateAvatar,
 } = require('../controllers/users');
-const regExp = require('../utils/regexp');
 
-router.get('/', getUsers);
-router.get('/me', getCurrentUser);
-router.get(
-  '/:userId',
+routerUsers.get('/users', getUsers);
+
+routerUsers.get('/users/me', getCurrentUser);
+
+routerUsers.get(
+  '/users/:userId',
   celebrate({
     params: Joi.object().keys({
-      userId: Joi.string().length(24).hex().required(),
+      userId: Joi.string().alphanum().length(24),
     }),
   }),
   getUser,
 );
-router.patch(
-  '/me',
+
+routerUsers.post(
+  '/signup',
   celebrate({
     body: Joi.object().keys({
-      name: Joi.string().required().min(2).max(30),
-      about: Joi.string().required().min(2).max(30),
+      name: Joi.string().min(2).max(30),
+      about: Joi.string().min(2).max(30),
+      avatar: Joi.string().pattern(
+        /^http[s]*:\/\/[a-z0-9.\-_~:/?#[\]@!$&'()*+,;=]+|www\.[a-z0-9.-_~:?#[\]@!$&'()*+,;=]+/,
+      ),
+      email: Joi.string().email().required(),
+      password: Joi.string().required().min(8),
+    }),
+  }),
+  createUser,
+);
+
+routerUsers.patch(
+  '/users/me',
+  celebrate({
+    body: Joi.object().keys({
+      name: Joi.string().min(2).max(30),
+      about: Joi.string().min(2).max(30),
     }),
   }),
   updateUser,
 );
-router.patch(
-  '/me/avatar',
+
+routerUsers.patch(
+  '/users/me/avatar',
   celebrate({
     body: Joi.object().keys({
-      avatar: Joi.string().pattern(regExp).required(),
+      avatar: Joi.string().pattern(
+        /^http[s]*:\/\/[a-z0-9.\-_~:/?#[\]@!$&'()*+,;=]+|www\.[a-z0-9.-_~:?#[\]@!$&'()*+,;=]+/,
+      ),
     }),
   }),
   updateAvatar,
 );
 
-module.exports = router;
+routerUsers.post(
+  '/signin',
+  celebrate({
+    body: Joi.object().keys({
+      email: Joi.string().email().required(),
+      password: Joi.string().required().min(8),
+    }),
+  }),
+  login,
+);
+
+module.exports = routerUsers;

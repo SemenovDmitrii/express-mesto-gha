@@ -42,21 +42,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     select: false,
+    minlength: 8,
   },
 });
 
-userSchema.set('toJSON', {
-  transform(doc, ret) {
-    const results = { ...ret };
-    results.password = null;
-    return results;
-  },
-});
-
-userSchema.statics.findUserByCredentials = function findUserByCredentials(
-  email,
-  password,
-) {
+userSchema.statics.findUserByCredentials = function (email, password) {
   return this.findOne({ email })
     .select('+password')
     .then((user) => {
