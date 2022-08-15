@@ -32,17 +32,23 @@ module.exports.createCard = (req, res, next) => {
 
 module.exports.deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
-    .orFail(() => new NotFoundError('Карточка не найдена'))
     .then((card) => {
-      if (!card.owner._id.toString().equal(req.user._id)) {
-        throw new ForbiddenError('Удаление чужой карточки, невозможно!');
+      if (!card) {
+        throw new NotFoundError('Карточка не найдена');
       }
-      return card
-        .remove()
-        .then(() => res.status(200).send({ message: 'Карточка удалена' }));
+      if (JSON.stringify(card.owner) !== JSON.stringify(req.user._id)) {
+        throw new ForbiddenError('Удаление чужой карточки, невозможно!');
+      } else {
+        return Card.deleteOne(card).then(() => res.status(200).send({ message: 'Карточка удалена' }));
+      }
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        throw new BadRequestError('Передан некорректный id');
+      }
+      next(err);
     })
     .catch(next);
-  return true;
 };
 
 module.exports.likeCard = (req, res, next) => {
