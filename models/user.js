@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const UnauthorizedError = require('../errors/UnauthorizedError');
 
 const userSchema = new mongoose.Schema({
@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema({
       'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
     validate: {
       validator(v) {
-        return /^(https?:\/\/)?([\w-]{1,32}\.[\w-]{1,32})[^\s@]*/gm.test(v);
+        return validator.isURL(v);
       },
       message: 'Ошибка при вводе ссылки',
     },
@@ -32,7 +32,9 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true,
     validate: {
-      validator: (email) => validator.isEmail(email),
+      validator(v) {
+        return validator.isEmail(v);
+      },
       message: 'Ошибка при вводе почты',
     },
   },
@@ -43,7 +45,18 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-userSchema.statics.findUserByCredentials = function (email, password) {
+userSchema.set('toJSON', {
+  transform(doc, ret) {
+    const results = { ...ret };
+    results.password = null;
+    return results;
+  },
+});
+
+userSchema.statics.findUserByCredentials = function findUserByCredentials(
+  email,
+  password,
+) {
   return this.findOne({ email })
     .select('+password')
     .then((user) => {
