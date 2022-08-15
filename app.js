@@ -3,7 +3,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 const { errors } = require('celebrate');
 const auth = require('./middlewares/auth');
-const login = require('./routes/users');
 const routerUsers = require('./routes/users');
 const routerCards = require('./routes/cards');
 
@@ -18,7 +17,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 });
 
 app.use(express.json());
-app.post('/signin', login);
+app.post('/signin', routerUsers);
 app.post('/signup', routerUsers);
 
 app.use(auth);

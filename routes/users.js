@@ -19,7 +19,7 @@ routerUsers.get(
   '/users/:userId',
   celebrate({
     params: Joi.object().keys({
-      userId: Joi.string().alphanum().length(24),
+      userId: Joi.string().hex().length(24),
     }),
   }),
   getUser,
@@ -35,7 +35,7 @@ routerUsers.post(
         /^http[s]*:\/\/[a-z0-9.\-_~:/?#[\]@!$&'()*+,;=]+|www\.[a-z0-9.-_~:?#[\]@!$&'()*+,;=]+/,
       ),
       email: Joi.string().email().required(),
-      password: Joi.string().required().min(8),
+      password: Joi.string().required(),
     }),
   }),
   createUser,
@@ -69,7 +69,7 @@ routerUsers.post(
   celebrate({
     body: Joi.object().keys({
       email: Joi.string().email().required(),
-      password: Joi.string().required().min(8),
+      password: Joi.string().required(),
     }),
   }),
   login,

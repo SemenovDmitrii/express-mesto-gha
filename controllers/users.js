@@ -41,34 +41,34 @@ module.exports.getUser = (req, res, next) => User.findById(req.params.userId)
 
 module.exports.createUser = (req, res, next) => {
   const {
-    name, avatar, about, password, email,
+    email, name, about, avatar,
   } = req.body;
 
-  return bcrypt.hash(password, 10).then((hash) => User.create({
-    name,
-    about,
-    avatar,
-    email,
-    password: hash,
-  })
-    .then((user) => res.status(201).send({
-      id: user._id,
-      name: user.name,
-      about: user.about,
-      avatar: user.avatar,
-      email: user.email,
-    }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        throw new BadRequestError(
-          'Переданы некорректные данные при создании пользователя.',
-        );
-      }
-      if (err.code === 11000) {
-        throw new ConflictError('Вееденный email уже зарегестрирован');
-      }
+  bcrypt.hash(req.body.password, 10).then((hash) => {
+    User.create({
+      email,
+      password: hash,
+      name,
+      about,
+      avatar,
     })
-    .catch(next));
+      .then((user) => res.status(201).send(user))
+      .catch((err) => {
+        if (err.code === 11000) {
+          next(new ConflictError('Вееденный email уже зарегестрирован'));
+          return;
+        }
+        if (err.name === 'ValidationError') {
+          next(
+            new BadRequestError(
+              `Переданы некорректные данные при создании пользователя: ${err}`,
+            ),
+          );
+        } else {
+          next(err);
+        }
+      });
+  });
 };
 
 module.exports.updateUser = (req, res, next) => {
