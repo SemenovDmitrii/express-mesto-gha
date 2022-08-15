@@ -41,10 +41,10 @@ module.exports.getUser = (req, res, next) => User.findById(req.params.userId)
 
 module.exports.createUser = (req, res, next) => {
   const {
-    email, name, about, avatar,
+    email, name, about, avatar, password,
   } = req.body;
 
-  bcrypt.hash(req.body.password, 10).then((hash) => {
+  bcrypt.hash(password, 10).then((hash) => {
     User.create({
       email,
       password: hash,
